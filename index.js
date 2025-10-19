@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportButton = document.getElementById('export-excel-btn');
     const submitButton = form.querySelector('button[type="submit"]');
 
+    // Selectores para validación
+    const montoInput = document.getElementById('monto');
+    const porcentajeInput = document.getElementById('porcentaje-pago');
+    const montoError = document.getElementById('monto-error');
+    const porcentajeError = document.getElementById('porcentaje-pago-error');
+
     // UI para Carga y Errores
     const loaderOverlay = document.getElementById('loader-overlay');
     const loaderMessage = document.getElementById('loader-message');
@@ -112,6 +118,45 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+
+    // --- Funciones de Validación ---
+    const validateMonto = () => {
+        const value = montoInput.value;
+        const parentGroup = montoInput.parentElement;
+        if (value.trim() === '') {
+            parentGroup.classList.add('has-error');
+            montoError.textContent = 'El monto es obligatorio.';
+            return false;
+        }
+        if (isNaN(value) || parseFloat(value) < 0) {
+            parentGroup.classList.add('has-error');
+            montoError.textContent = 'Por favor, introduce un número positivo.';
+            return false;
+        }
+        parentGroup.classList.remove('has-error');
+        montoError.textContent = '';
+        return true;
+    };
+
+    const validatePorcentaje = () => {
+        const value = porcentajeInput.value;
+        const parentGroup = porcentajeInput.parentElement;
+        if (value.trim() === '') {
+            parentGroup.classList.add('has-error');
+            porcentajeError.textContent = 'El porcentaje es obligatorio.';
+            return false;
+        }
+        const numValue = parseFloat(value);
+        if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+            parentGroup.classList.add('has-error');
+            porcentajeError.textContent = 'Debe ser un número entre 0 y 100.';
+            return false;
+        }
+        parentGroup.classList.remove('has-error');
+        porcentajeError.textContent = '';
+        return true;
+    };
+
 
     // --- Funciones de la aplicación ---
     const setFormDirty = () => { isFormDirty = true; };
@@ -240,6 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('form-title').textContent = 'Cargar Nuevo Entregable';
         submitButton.textContent = 'Guardar Entregable';
         cancelButton.style.display = 'none';
+        
+        // Limpiar estados de validación
+        montoInput.parentElement.classList.remove('has-error');
+        montoError.textContent = '';
+        porcentajeInput.parentElement.classList.remove('has-error');
+        porcentajeError.textContent = '';
+
         resetFormDirtyState();
     };
 
@@ -302,8 +354,21 @@ document.addEventListener('DOMContentLoaded', () => {
     errorCloseBtn.addEventListener('click', hideError);
     successCloseBtn.addEventListener('click', hideSuccess);
 
+    // Listeners de validación en tiempo real
+    montoInput.addEventListener('input', validateMonto);
+    porcentajeInput.addEventListener('input', validatePorcentaje);
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Ejecutar validación antes de enviar
+        const isMontoValid = validateMonto();
+        const isPorcentajeValid = validatePorcentaje();
+
+        if (!isMontoValid || !isPorcentajeValid) {
+            showError('Por favor, corrige los errores en el formulario.');
+            return; // Detener el envío si hay errores
+        }
         
         const formData = new FormData(form);
         const deliverableData = {
