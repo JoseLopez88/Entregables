@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Selectores del DOM ---
     const tabs = document.querySelectorAll('.tab-button');
@@ -365,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const result = await fetchWithHandling(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'delete', data: id })
+                    body: JSON.stringify({ action: 'delete', id: id })
                 }, 'Eliminando...');
 
                 if (result.status !== 'success') throw new Error(result.message);
