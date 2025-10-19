@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- Selectores del DOM ---
     const tabs = document.querySelectorAll('.tab-button');
