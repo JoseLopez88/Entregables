@@ -45,23 +45,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let errorTimeout;
     const showError = (message) => {
         errorMessage.textContent = message;
-        errorToast.style.bottom = '2rem';
+        errorToast.classList.add('show');
         clearTimeout(errorTimeout);
         errorTimeout = setTimeout(hideError, 6000); // Ocultar después de 6 segundos
     };
     const hideError = () => {
-        errorToast.style.bottom = '-100%';
+        errorToast.classList.remove('show');
     };
 
     let successTimeout;
     const showSuccess = (message) => {
         successMessage.textContent = message;
-        successToast.style.bottom = '2rem';
+        successToast.classList.add('show');
         clearTimeout(successTimeout);
         successTimeout = setTimeout(hideSuccess, 4000); // Ocultar después de 4 segundos
     };
     const hideSuccess = () => {
-        successToast.style.bottom = '-100%';
+        successToast.classList.remove('show');
     };
 
     // --- Wrapper de Fetch para manejo centralizado ---
@@ -197,9 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${d.mesPago || 'N/A'}</td>
                 <td><span class="status status-${(d.estado || 'pendiente').toLowerCase().replace(/\s/g, '-')}">${d.estado || 'Pendiente'}</span></td>
                 <td style="text-align: center;">${linkCellHTML}</td>
-                <td>
-                    <button class="action-btn edit-btn" data-id="${d.id}" aria-label="Editar ${d.descripcion || ''}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></button>
-                    <button class="action-btn delete-btn" data-id="${d.id}" aria-label="Eliminar ${d.descripcion || ''}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
+                <td style="text-align: right;">
+                    <button class="action-btn edit-btn" data-id="${d.id}" title="Editar entregable" aria-label="Editar ${d.descripcion || ''}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></button>
+                    <button class="action-btn delete-btn" data-id="${d.id}" title="Eliminar entregable" aria-label="Eliminar ${d.descripcion || ''}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -346,6 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 1. Actualización optimista en la UI
             deliverables.unshift(tempDeliverable);
+            renderTable();
+            populateMonthFilter();
             resetFormState();
             switchTab('consultar');
             showSuccess('Guardando entregable...');
