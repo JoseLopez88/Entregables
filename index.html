@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Entregables</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M25,10 h50 a10,10 0 0,1 10,10 v70 a10,10 0 0,1 -10,10 h-50 a10,10 0 0,1 -10,-10 v-70 a10,10 0 0,1 10,-10' fill='%23ffffff' stroke='%234A90E2' stroke-width='5'/><path d='M35,30 h30 M35,50 h30 M35,70 h20' stroke='%234A90E2' stroke-width='5' stroke-linecap='round'/></svg>">
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --primary-color-dark: #357ABD;
+            --background-color: #f7f8fa;
+            --surface-color: #ffffff;
+            --text-color: #2d3748;
+            --text-color-light: #718096;
+            --border-color: #e2e8f0;
+            --status-pagado-bg: #e6fffa;
+            --status-pagado-text: #2c7a7b;
+            --status-pendiente-bg: #fffaf0;
+            --status-pendiente-text: #c05621;
+            --status-en-proceso-bg: #ebf8ff;
+            --status-en-proceso-text: #3182ce;
+            --danger-color: #e53e3e;
+            --success-color: #48bb78;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: var(--surface-color);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        header p {
+            margin-top: 0.5rem;
+            color: var(--text-color-light);
+            font-size: 1.1rem;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab-button {
+            padding: 1rem 0.5rem;
+            margin: 0 1rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color-light);
+            transition: color 0.2s ease, border-color 0.2s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px; /* Align with container border */
+        }
+        .tab-button:first-child { margin-left: 0; }
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .tab-button:hover:not(.active) {
+            color: var(--text-color);
+        }
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+
+        /* Form Styles */
+        #deliverable-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: block;
+        }
+        .form-group input, .form-group select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+        .form-grid-multi {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-color-dark);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+        .btn[disabled] {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Table Styles */
+        .filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: flex-end;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            vertical-align: middle;
+        }
+        th {
+            background-color: var(--background-color);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-color-light);
+            border-bottom: 1px solid var(--border-color);
+        }
+        tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        tbody tr:hover {
+            background-color: #fcfdfe;
+        }
+        .document-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .document-link:hover {
+            color: var(--primary-color-dark);
+        }
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-pagado { color: var(--status-pagado-text); background-color: var(--status-pagado-bg); }
+        .status-pendiente { color: var(--status-pendiente-text); background-color: var(--status-pendiente-bg); }
+        .status-en-proceso { color: var(--status-en-proceso-text); background-color: var(--status-en-proceso-bg); }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--text-color-light);
+            margin: 0 0.25rem;
+            border-radius: 50%;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        .action-btn svg { vertical-align: middle; }
+        .action-btn:hover {
+            color: var(--primary-color);
+            background-color: var(--status-en-proceso-bg);
+        }
+        .action-btn.delete-btn:hover {
+            color: var(--danger-color);
+            background-color: #feebec;
+        }
+        #no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-color-light);
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+        }
+        .progress-bar-wrapper {
+            flex-grow: 1;
+            background-color: var(--border-color);
+            border-radius: 9999px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+        .progress-bar-fill[style*="width: 100%"] {
+            background-color: var(--success-color);
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 35px; /* to avoid layout shifts */
+            text-align: right;
+        }
+
+        /* Loader and Toast Styles */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div class="container">
+        <div id="loader-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; border-radius: 12px; transition: opacity 0.3s; opacity: 0; pointer-events: none;">
+            <div class="spinner"></div>
+            <p id="loader-message" style="margin-top: 1rem; font-weight: 500; color: var(--text-color);">Cargando...</p>
+        </div>
+        
+        <header>
+            <h1>Gestor de Entregables</h1>
+            <p>Carga y consulta la información de tus entregables de forma sencilla y elegante.</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-button" data-target="cargar">Cargar Entregable</button>
+            <button class="tab-button" data-target="consultar">Consultar Entregables</button>
+        </nav>
+
+        <main>
+            <!-- Vista para Cargar/Editar Entregable -->
+            <div id="cargar" class="view">
+                <h2 id="form-title" style="margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 600;">Cargar Nuevo Entregable</h2>
+                <form id="deliverable-form">
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <input type="text" id="descripcion" name="descripcion" required placeholder="Ej: Informe de Ventas Q2">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="documento-interno">Documento Interno</label>
+                        <input type="text" id="documento-interno" name="documento-interno" placeholder="Ej: informe-q2.pdf">
+                    </div>
+                     <div class="form-group">
+                        <label for="documento-externo">Documento Externo</label>
+                        <input type="text" id="documento-externo" name="documento-externo" placeholder="Ej: EXT-2024-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="documento-url">Enlace al Documento (Opcional)</label>
+                        <input type="url" id="documento-url" name="documento-url" placeholder="https://docs.google.com/document/d/...">
+                    </div>
+
+                    <div class="form-grid-multi">
+                        <div class="form-group">
+                            <label for="monto">Monto</label>
+                            <input type="number" id="monto" name="monto" required min="0" step="0.01" placeholder="Ej: 5000.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="porcentaje-pago">Porcentaje de Pago (%)</label>
+                            <input type="number" id="porcentaje-pago" name="porcentaje-pago" required min="0" max="100" step="1" placeholder="Ej: 50">
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha-presentacion">Fecha de Presentación</label>
+                            <input type="date" id="fecha-presentacion" name="fecha-presentacion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mes-pago">Mes de Pago</label>
+                            <select id="mes-pago" name="mes-pago" required>
+                                <option value="" disabled selected>Selecciona un mes</option>
+                                <option value="Enero">Enero</option>
+                                <option value="Febrero">Febrero</option>
+                                <option value="Marzo">Marzo</option>
+                                <option value="Abril">Abril</option>
+                                <option value="Mayo">Mayo</option>
+                                <option value="Junio">Junio</option>
+                                <option value="Julio">Julio</option>
+                                <option value="Agosto">Agosto</option>
+                                <option value="Septiembre">Septiembre</option>
+                                <option value="Octubre">Octubre</option>
+                                <option value="Noviembre">Noviembre</option>
+                                <option value="Diciembre">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="estado">Estado</label>
+                            <select id="estado" name="estado" required>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En proceso">En proceso</option>
+                                <option value="Pagado">Pagado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button id="cancel-button" type="button" class="btn btn-secondary" style="display: none;">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Entregable</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Vista para Consultar Entregables -->
+            <div id="consultar" class="view">
+                 <div class="filter-controls">
+                    <div class="form-group">
+                        <label for="search-input">Buscar por descripción o documento</label>
+                        <input type="search" id="search-input" placeholder="Escribe para buscar...">
+                    </div>
+                     <div class="form-group">
+                        <label for="month-filter">Filtrar por Mes de Pago</label>
+                        <select id="month-filter">
+                            <option value="">Todos los Meses</option>
+                            <!-- Opciones se llenarán dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label> <!-- Dummy label for alignment -->
+                        <button id="export-excel-btn" class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Exportar a Excel</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Doc. Interno</th>
+                                <th>Doc. Externo</th>
+                                <th>Monto</th>
+                                <th>Porcentaje de Pago</th>
+                                <th>Fecha de Presentación</th>
+                                <th>Mes de Pago</th>
+                                <th>Estado</th>
+                                <th>Enlace</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deliverables-body">
+                            <!-- Filas se insertarán aquí -->
+                        </tbody>
+                    </table>
+                    <div id="no-results" style="display: none;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="error-toast" style="position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); background-color: var(--danger-color); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1001; transition: bottom 0.5s ease-in-out; display: flex; align-items: center;">
+        <span id="error-message"></span>
+        <button id="error-close" style="background: none; border: none; color: white; margin-left: 1.5rem; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0;">&times;</button>
+    </div>
+
+    <div id="success-toast" style="position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); background-color: var(--success-color); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1001; transition: bottom 0.5s ease-in-out; display: flex; align-items: center;">
+        <span id="success-message"></span>
+        <button id="success-close" style="background: none; border: none; color: white; margin-left: 1.5rem; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0;">&times;</button>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="index.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

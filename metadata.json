@@ -1,0 +1,5 @@
+{
+  "name": "Gestor de Entregables",
+  "description": "Una aplicación web para cargar y consultar información sobre entregables presentados, permitiendo un seguimiento eficiente del estado y los montos de cada uno.",
+  "requestFramePermissions": []
+}
