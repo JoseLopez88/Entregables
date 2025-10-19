@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const deliverableData = {
             descripcion: formData.get('descripcion'),
             monto: parseFloat(formData.get('monto')) || 0,
-            porcentajePago: parseInt(formData.get('porcentaje-pago'), 10) || 0,
+            porcentajePago: parseFloat(formData.get('porcentaje-pago')) || 0,
             fechaPresentacion: formData.get('fecha-presentacion'),
             mesPago: formData.get('mes-pago'),
             estado: formData.get('estado'),
