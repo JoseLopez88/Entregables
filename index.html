@@ -9,23 +9,30 @@
         :root {
             --primary-color: #4A90E2;
             --primary-color-dark: #357ABD;
-            --background-color: #f7f8fa;
+            --primary-color-light: #e3f2fd;
+            --background-color: #f8f9fc;
             --surface-color: #ffffff;
-            --text-color: #2d3748;
-            --text-color-light: #718096;
-            --border-color: #e2e8f0;
-            --status-pagado-bg: #e6fffa;
-            --status-pagado-text: #2c7a7b;
-            --status-pendiente-bg: #fffaf0;
-            --status-pendiente-text: #c05621;
-            --status-en-proceso-bg: #ebf8ff;
-            --status-en-proceso-text: #3182ce;
-            --danger-color: #e53e3e;
-            --success-color: #48bb78;
+            --text-color: #333d4b;
+            --text-color-light: #6b7280;
+            --border-color: #e5e7eb;
+            --status-pagado-bg: #d1fae5;
+            --status-pagado-text: #065f46;
+            --status-pendiente-bg: #fffbeb;
+            --status-pendiente-text: #b45309;
+            --status-en-proceso-bg: #dbeafe;
+            --status-en-proceso-text: #1e40af;
+            --danger-color: #ef4444;
+            --danger-color-light: #fee2e2;
+            --success-color: #22c55e;
+            --success-color-light: #dcfce7;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
@@ -39,56 +46,74 @@
             margin: auto;
             background: var(--surface-color);
             padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
             position: relative;
         }
 
         header {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
             margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
         }
-        header h1 {
+        header .icon {
+            flex-shrink: 0;
+            background-color: var(--primary-color-light);
+            color: var(--primary-color);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        header .header-text h1 {
             margin: 0;
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
         }
-        header p {
-            margin-top: 0.5rem;
+        header .header-text p {
+            margin: 0.25rem 0 0;
             color: var(--text-color-light);
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         .tabs {
             display: flex;
             margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--border-color);
+            background-color: var(--background-color);
+            padding: 0.25rem;
+            border-radius: 12px;
         }
         .tab-button {
-            padding: 1rem 0.5rem;
-            margin: 0 1rem;
+            flex: 1;
+            padding: 0.75rem 0.5rem;
             cursor: pointer;
             border: none;
             background: transparent;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: var(--text-color-light);
-            transition: color 0.2s ease, border-color 0.2s ease;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -1px; /* Align with container border */
+            transition: color 0.2s ease, background-color 0.3s ease;
+            border-radius: 9px;
         }
-        .tab-button:first-child { margin-left: 0; }
         .tab-button.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
-        .tab-button:hover:not(.active) {
-            color: var(--text-color);
+            color: var(--primary-color-dark);
+            background-color: var(--surface-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
         }
         .view {
             display: none;
         }
         .view.active {
             display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Form Styles */
@@ -99,8 +124,8 @@
         }
         .form-group label {
             margin-bottom: 0.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 500;
+            font-size: 0.875rem;
             display: block;
         }
         .form-group input, .form-group select {
@@ -108,14 +133,14 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             width: 100%;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            background-color: #fff;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            box-sizing: border-box;
         }
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
         }
         .form-grid-multi {
             display: grid;
@@ -133,9 +158,13 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         .btn:hover {
             transform: translateY(-2px);
@@ -149,11 +178,13 @@
             background-color: var(--primary-color-dark);
         }
         .btn-secondary {
-            background-color: #e2e8f0;
-            color: #4a5568;
+            background-color: #fff;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
         }
         .btn-secondary:hover {
-            background-color: #cbd5e0;
+            background-color: var(--background-color);
+            border-color: #d1d5db;
         }
         .btn[disabled] {
             cursor: not-allowed;
@@ -172,6 +203,8 @@
         }
         .table-wrapper {
             overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
         }
         table {
             width: 100%;
@@ -181,24 +214,24 @@
         th, td {
             padding: 1rem 1.25rem;
             vertical-align: middle;
+            white-space: nowrap;
         }
         th {
             background-color: var(--background-color);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-color-light);
-            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
         }
         tbody tr {
             border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s ease;
         }
         tbody tr:last-child {
             border-bottom: none;
         }
-        tbody tr:hover {
-            background-color: #fcfdfe;
+        tbody tr:nth-child(even) {
+            background-color: #fcfcfd;
         }
         .document-link {
             display: inline-flex;
@@ -217,6 +250,7 @@
             border-radius: 9999px;
             font-size: 0.8rem;
             font-weight: 600;
+            display: inline-block;
         }
         .status-pagado { color: var(--status-pagado-text); background-color: var(--status-pagado-bg); }
         .status-pendiente { color: var(--status-pendiente-text); background-color: var(--status-pendiente-bg); }
@@ -235,11 +269,11 @@
         .action-btn svg { vertical-align: middle; }
         .action-btn:hover {
             color: var(--primary-color);
-            background-color: var(--status-en-proceso-bg);
+            background-color: var(--primary-color-light);
         }
         .action-btn.delete-btn:hover {
             color: var(--danger-color);
-            background-color: #feebec;
+            background-color: var(--danger-color-light);
         }
         #no-results {
             text-align: center;
@@ -251,30 +285,31 @@
         .progress-container {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            min-width: 120px;
+            gap: 0.75rem;
+            min-width: 130px;
         }
         .progress-bar-wrapper {
             flex-grow: 1;
-            background-color: var(--border-color);
+            background-color: #e9ecef;
             border-radius: 9999px;
-            height: 10px;
+            height: 8px;
             overflow: hidden;
         }
         .progress-bar-fill {
             height: 100%;
             background-color: var(--primary-color);
             border-radius: 9999px;
-            transition: width 0.3s ease;
+            transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .progress-bar-fill[style*="width: 100%"] {
             background-color: var(--success-color);
         }
         .progress-text {
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             font-weight: 500;
-            min-width: 35px; /* to avoid layout shifts */
+            min-width: 40px;
             text-align: right;
+            color: var(--text-color-light);
         }
 
         /* Loader and Toast Styles */
@@ -284,12 +319,51 @@
             height: 36px;
             border-radius: 50%;
             border-left-color: var(--primary-color);
-            animation: spin 1s ease infinite;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
+
+        .toast {
+            position: fixed;
+            bottom: -100%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), bottom 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .toast.show {
+            bottom: 2rem;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast .toast-icon {
+            flex-shrink: 0;
+        }
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .toast .toast-close:hover {
+            opacity: 1;
+        }
+        #error-toast { background-color: var(--danger-color); }
+        #success-toast { background-color: var(--success-color); }
     </style>
 </head>
 <body>
@@ -300,8 +374,13 @@
         </div>
         
         <header>
-            <h1>Gestor de Entregables</h1>
-            <p>Carga y consulta la información de tus entregables de forma sencilla y elegante.</p>
+            <div class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="header-text">
+                <h1>Gestor de Entregables</h1>
+                <p>Carga y consulta la información de tus entregables de forma sencilla y eficiente.</p>
+            </div>
         </header>
 
         <nav class="tabs">
@@ -312,20 +391,22 @@
         <main>
             <!-- Vista para Cargar/Editar Entregable -->
             <div id="cargar" class="view">
-                <h2 id="form-title" style="margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 600;">Cargar Nuevo Entregable</h2>
+                <h2 id="form-title" style="margin-bottom: 2rem; font-size: 1.5rem; font-weight: 600;">Cargar Nuevo Entregable</h2>
                 <form id="deliverable-form">
                     <div class="form-group">
                         <label for="descripcion">Descripción</label>
                         <input type="text" id="descripcion" name="descripcion" required placeholder="Ej: Informe de Ventas Q2">
                     </div>
 
-                    <div class="form-group">
-                        <label for="documento-interno">Documento Interno</label>
-                        <input type="text" id="documento-interno" name="documento-interno" placeholder="Ej: informe-q2.pdf">
-                    </div>
-                     <div class="form-group">
-                        <label for="documento-externo">Documento Externo</label>
-                        <input type="text" id="documento-externo" name="documento-externo" placeholder="Ej: EXT-2024-001">
+                    <div class="form-grid-multi" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label for="documento-interno">Documento Interno</label>
+                            <input type="text" id="documento-interno" name="documento-interno" placeholder="Ej: informe-q2.pdf">
+                        </div>
+                        <div class="form-group">
+                            <label for="documento-externo">Documento Externo</label>
+                            <input type="text" id="documento-externo" name="documento-externo" placeholder="Ej: EXT-2024-001">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="documento-url">Enlace al Documento (Opcional)</label>
@@ -396,7 +477,7 @@
                     </div>
                     <div class="form-group">
                         <label>&nbsp;</label> <!-- Dummy label for alignment -->
-                        <button id="export-excel-btn" class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <button id="export-excel-btn" class="btn btn-secondary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             <span>Exportar a Excel</span>
                         </button>
@@ -411,11 +492,11 @@
                                 <th>Doc. Externo</th>
                                 <th>Monto</th>
                                 <th>Porcentaje de Pago</th>
-                                <th>Fecha de Presentación</th>
+                                <th>Fecha</th>
                                 <th>Mes de Pago</th>
                                 <th>Estado</th>
-                                <th>Enlace</th>
-                                <th>Acciones</th>
+                                <th style="text-align: center;">Enlace</th>
+                                <th style="text-align: right;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="deliverables-body">
@@ -428,14 +509,16 @@
         </main>
     </div>
     
-    <div id="error-toast" style="position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); background-color: var(--danger-color); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1001; transition: bottom 0.5s ease-in-out; display: flex; align-items: center;">
+    <div id="error-toast" class="toast">
+        <div class="toast-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
         <span id="error-message"></span>
-        <button id="error-close" style="background: none; border: none; color: white; margin-left: 1.5rem; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0;">&times;</button>
+        <button id="error-close" class="toast-close">&times;</button>
     </div>
 
-    <div id="success-toast" style="position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); background-color: var(--success-color); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1001; transition: bottom 0.5s ease-in-out; display: flex; align-items: center;">
+    <div id="success-toast" class="toast">
+        <div class="toast-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
         <span id="success-message"></span>
-        <button id="success-close" style="background: none; border: none; color: white; margin-left: 1.5rem; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0;">&times;</button>
+        <button id="success-close" class="toast-close">&times;</button>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
