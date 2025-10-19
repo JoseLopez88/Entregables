@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const result = await fetchWithHandling(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'delete', data: { id: id } })
+                    body: JSON.stringify({ action: 'delete', data: id })
                 }, 'Eliminando...');
 
                 if (result.status !== 'success') throw new Error(result.message);
