@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="progress-bar-wrapper">
                             <div class="progress-bar-fill" style="width: ${d.porcentajePago || 0}%;"></div>
                         </div>
-                        <span class="progress-text">${d.porcentajePago || 0}%</span>
+                        <span class="progress-text">${(parseFloat(d.porcentajePago) || 0).toFixed(2)}%</span>
                     </div>
                 </td>
                 <td>${formattedDate}</td>
