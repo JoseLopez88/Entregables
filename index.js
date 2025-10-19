@@ -361,18 +361,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Actualización optimista
             deliverables.splice(indexToDelete, 1);
             renderTable();
-            
-            // Construimos la URL con parámetros. Este método es más robusto para Google Apps Script
-            // ya que evita problemas de análisis de JSON en el backend (e.postData.contents).
-            // El backend podrá leer los datos fácilmente desde e.parameter.action y e.parameter.id.
-            const urlWithParams = new URL(SCRIPT_URL);
-            urlWithParams.searchParams.append('action', 'delete');
-            urlWithParams.searchParams.append('id', id);
 
             try {
-                // Hacemos un POST a la URL con parámetros, pero sin cuerpo (body).
-                const result = await fetchWithHandling(urlWithParams.toString(), {
+                const result = await fetchWithHandling(SCRIPT_URL, {
                     method: 'POST',
+                    body: JSON.stringify({ action: 'delete', data: { id: id } })
                 }, 'Eliminando...');
 
                 if (result.status !== 'success') throw new Error(result.message);
