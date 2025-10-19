@@ -65,13 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Wrapper de Fetch para manejo centralizado ---
-    const fetchWithHandling = async (url, options = {}, loadingMessage = 'Procesando...') => {
-        showLoader(loadingMessage);
+    const fetchWithHandling = async (url, options = {}, loadingMessage) => {
+        // Solo muestra el loader si se proporciona un mensaje
+        if (loadingMessage) {
+            showLoader(loadingMessage);
+        }
         
         const finalOptions = { ...options };
         if (finalOptions.body) {
-            // Para Google Apps Script, enviar como text/plain es más robusto.
-            // Evita problemas de CORS (preflight) que a veces ocurren con application/json.
             finalOptions.headers = {
                 ...finalOptions.headers,
                 'Content-Type': 'text/plain;charset=utf-8',
@@ -85,15 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 let errorText = `Error del servidor: ${response.status} ${response.statusText}`;
                 try {
                     const errorBody = await response.text();
-                    // Logueamos el error completo para depuración avanzada
                     console.error("DEBUG: Texto completo del error del servidor:", errorBody); 
                     
                     if (errorBody.trim().startsWith('<!DOCTYPE html>')) {
-                        errorText = 'El script de Google devolvió un error. Revisa la consola del navegador (F12) y la configuración del script (permisos, implementación).';
+                        errorText = 'El script de Google devolvió un error. Revisa la consola y la configuración del script.';
                     } else {
                         errorText = `Error: ${errorBody}`;
                     }
-                } catch (e) { /* ignorar si el cuerpo del error no se puede leer */ }
+                } catch (e) { /* ignorar */ }
                 throw new Error(errorText);
             }
             
@@ -101,13 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 return JSON.parse(text);
             } catch (e) {
-                throw new Error('Respuesta no válida del servidor. Asegúrate de que el script de Google siempre devuelva JSON.');
+                throw new Error('Respuesta no válida del servidor. Asegúrate de que el script devuelva JSON.');
             }
         } catch (error) {
             showError(error.message);
-            throw error; // Relanzar para que el llamador pueda manejar la lógica de la UI
+            throw error;
         } finally {
-            hideLoader();
+            if (loadingMessage) {
+                hideLoader();
+            }
         }
     };
 
@@ -166,6 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         filteredDeliverables.sort((a, b) => b.id - a.id).forEach(d => {
             const row = document.createElement('tr');
+            // Si el ID es temporal (negativo), añade un estilo para indicar que se está guardando
+            if (d.id < 0) {
+                row.style.opacity = '0.6';
+            }
             const [year, month, day] = d.fechaPresentacion ? String(d.fechaPresentacion).split('T')[0].split('-') : ['','',''];
             const formattedDate = day ? `${day}/${month}/${year}` : 'N/A';
             
@@ -271,7 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Mapear a un formato más legible para Excel
         const dataToExport = filteredData.map(d => ({
             'ID': d.id,
             'Descripción': d.descripcion,
@@ -288,8 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Entregables");
-
-        // Estilo y descarga
         XLSX.writeFile(workbook, "Reporte_Entregables.xlsx");
     };
 
@@ -301,8 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const originalButtonText = submitButton.textContent;
-        submitButton.disabled = true;
         
         const formData = new FormData(form);
         const deliverableData = {
@@ -318,27 +319,63 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (editingDeliverableId) {
+            // --- Lógica de EDICIÓN (con loader) ---
+            submitButton.disabled = true;
             deliverableData.id = editingDeliverableId;
-        }
-        
-        try {
-            const result = await fetchWithHandling(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'save', data: deliverableData })
-            }, editingDeliverableId ? 'Actualizando...' : 'Guardando...');
+            try {
+                const result = await fetchWithHandling(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'save', data: deliverableData })
+                }, 'Actualizando...');
 
-            if (result.status !== 'success') throw new Error(result.message);
-            
-            showSuccess(editingDeliverableId ? 'Entregable actualizado.' : 'Entregable guardado.');
-            await loadDeliverables();
+                if (result.status !== 'success') throw new Error(result.message);
+                
+                showSuccess('Entregable actualizado.');
+                await loadDeliverables(); // Recarga completa para asegurar consistencia
+                resetFormState();
+                switchTab('consultar');
+            } catch (error) {
+                console.error("Error actualizando datos:", error);
+            } finally {
+                submitButton.disabled = false;
+            }
+        } else {
+            // --- Lógica de CREACIÓN (Optimista, sin loader) ---
+            const tempId = -Date.now(); // ID temporal y negativo para identificarlo
+            const tempDeliverable = { ...deliverableData, id: tempId };
+
+            // 1. Actualización optimista en la UI
+            deliverables.unshift(tempDeliverable);
             resetFormState();
             switchTab('consultar');
-        } catch (error) {
-            // El error ya se muestra en el toast, solo logueamos para depuración.
-            console.error("Error guardando datos:", error);
-        } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = originalButtonText;
+            showSuccess('Guardando entregable...');
+
+            // 2. Envío en segundo plano
+            try {
+                const result = await fetchWithHandling(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'save', data: deliverableData })
+                }); // Sin mensaje de carga
+
+                if (result.status !== 'success') throw new Error(result.message);
+
+                // 3. Sincronizar el registro con los datos reales del servidor (incluido el ID final)
+                const savedDeliverable = result.data;
+                const index = deliverables.findIndex(d => d.id === tempId);
+                if (index !== -1) {
+                    deliverables[index] = savedDeliverable;
+                }
+                showSuccess('Entregable guardado correctamente.');
+            } catch (error) {
+                // 4. Revertir si falla
+                showError('Error al guardar. El registro ha sido descartado.');
+                deliverables = deliverables.filter(d => d.id !== tempId);
+                console.error("Error guardando datos:", error);
+            } finally {
+                // 5. Renderizar la tabla para reflejar el estado final (ya sea con el ID correcto o sin el registro)
+                renderTable();
+                populateMonthFilter();
+            }
         }
     });
 
